@@ -1,0 +1,8 @@
+遇到的问题：
+Cannot load connection class because of underlying exception: com.mysql.cj.exceptions.WrongArgumentException: Malformed database URL, failed to parse the main URL sections
+
+Error creating bean with name 'dataSource' defined in class path resource [com/alibaba/druid/spring/boot/autoconfigure/DruidDataSourceAutoConfigure.class]: 
+Invocation of init method failed; nested exception is java.lang.NullPointerException
+
+https://blog.csdn.net/qq_39291929/article/details/78896666
+
