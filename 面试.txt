@@ -1,0 +1,41 @@
+spring基础以及原理
+springmvc
+spring cloud spring boot
+spring cloud组件：eureka feign zuul（gateway） Hystrix config
+mybatis hibernate
+mysql oracle
+linux Nginx  svn  git 
+
+运算：基本的数学运算  位运算  逻辑运算
+
+线程 
+进程 
+高并发相关问题 
+锁机制  分布式锁 同步非同步
+线程池 
+线程之间的通讯
+
+jvm原理 存储模块（堆栈） GC机制
+
+数据结构以及存储
+
+自定义注解以及反射  https://www.cnblogs.com/dalaoyang/p/8657030.html
+
+Test test = new Test();
+
+Class clazz = test.class;test.getClass();Class.forName("com.zeng.Test");
+
+再获取其中方法以及属性（解析注解） https://blog.csdn.net/andyzhu_2005/article/details/81355399
+
+
+string字符串的相关方法（占位符，字符集） 以及常量、枚举  
+序列化对象  继承对象  byte[]数组 字符串 对象 相互之间的转化
+
+23种模式  常见的算法（查找 排序）
+ 
+
+
+
+
+
+

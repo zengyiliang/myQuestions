@@ -4,5 +4,11 @@ Cannot load connection class because of underlying exception: com.mysql.cj.excep
 Error creating bean with name 'dataSource' defined in class path resource [com/alibaba/druid/spring/boot/autoconfigure/DruidDataSourceAutoConfigure.class]: 
 Invocation of init method failed; nested exception is java.lang.NullPointerException
 
+缺少了jar包
+
 https://blog.csdn.net/qq_39291929/article/details/78896666
+
+
+
+
 
