@@ -1,0 +1,152 @@
+zuul：
+zuulFilter
+路由网关 反向代理（与Nginx的区别）
+与eureka ribbon负载均衡
+过滤（鉴权 校验 限流）
+降级ZuulFallbackProvider
+Zuul使用正则表达式指定路由规则
+https://www.jianshu.com/p/12a70993e321 
+
+Zuul 的特点是路由+过滤器，核心是一系列的过滤器，Zuul 定义了四种过滤器
+前置（Pre）
+路由（Route）
+后置（Post）
+错误（Error）
+Zuul 默认集成 Ribbon 实现了负载均衡的功能。
+zuul:
+  routes:    
+    myroute1:                            #配置的路由名
+      path: /user/**                    #访问路径
+      serviceId: spring-boot-user  #配置路由的微服务名
+ 
+ribbon:
+  eureka:
+    enable: false      #暂时关闭eureka对ribbon的支持
+ 
+#负载均衡配置
+spring-boot-user:
+  ribbon:
+    listOfServices: http://192.168.1.4:7902,http://192.168.1.4:7901
+	
+	
+spring.application.name = Sping-Cloud-Server-Zuul
+server.port = 8889
+eureka.client.serviceUrl.defaultZone = http://localhost:8888/eureka/
+eureka.instance.instance-id = ${spring.application.name}:${spring.application.instance_id:${server.port}}
+eureka.instance.prefer-ip-address=true
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds = 5000
+#表示使用/userserver/user/1 代替从eureka服务器中的userserverregistry的实例IP:端口/user/1#其中/userserver 表示的是ServerceId的实例
+zuul.routes.api-a.path = /userserver/**
+zuul.routes.api-a.serviceId = userserverregistry
+#配置对应服务ID的负载均衡规则#
+userserverregistry.ribbon.NFLoadBalancerRuleClassName= com.netflix.loadbalancer.RandomRule
+
+zuul实现限流
+@Component
+public class OrderRateLimiterFilter extends ZuulFilter {
+
+
+//每秒产生1000个令牌
+private static final RateLimiter RATE_LIMITER = RateLimiter.create(1000);
+
+@Override
+public String filterType() {
+	return PRE_TYPE;
+}
+
+@Override
+public int filterOrder() {
+	return -4;
+}
+
+@Override
+public boolean shouldFilter() {
+	RequestContext requestContext = RequestContext.getCurrentContext();
+	HttpServletRequest request = requestContext.getRequest();
+
+	//只对订单接口限流
+	if ("/apigateway/order/api/v1/order/save".equalsIgnoreCase(request.getRequestURI())) {
+		return true;
+	}
+	return false;
+}
+
+@Override
+public Object run() throws ZuulException {
+	RequestContext requestContext = RequestContext.getCurrentContext();
+
+	//就相当于每调用一次tryAcquire()方法，令牌数量减1，当1000个用完后，那么后面进来的用户无法访问上面接口
+	//当然这里只写类上面一个接口，可以这么写，实际可以在这里要加一层接口判断。
+	if (!RATE_LIMITER.tryAcquire()) {
+		requestContext.setSendZuulResponse(false);
+		//HttpStatus.TOO_MANY_REQUESTS.value()里面有静态代码常量
+		requestContext.setResponseStatusCode(HttpStatus.TOO_MANY_REQUESTS.value());
+	}
+	return null;
+}
+}
+
+
+spring cloud config：
+访问配置信息的URL与配置文件的映射关系如下：
+/{application}/{profile} [/{label}]
+/{application}-{profile}.yml
+/{label}/{application}-{profile}.yml
+/{application}-{profile}.properties
+/{label}/{appliction}-{profile}.properties
+上面的url会映射{application}-{profile}.properties对应的配置文件，
+其中{label}对应Git上不同的分支，不输入就默认是master。
+通过浏览器访问http://localhost:7001/sam/dev/master,结果如下：
+
+由于config server不提供高可用实现，一般做法有以下两种：
+利用其它负载均衡实现。
+配置中心服务化，注册到eureka，利用eureka提供负载均衡，服务熔断等功能
+也就是把配置中心也注册到Eureka-Server上称为一个服务，这样，就和其他普通的服务一样做到了多实例，负载均衡，当然也做到了高可用，还有其他的一些功能特性
+
+application.yml 与 bootstrap.yml的区别：
+加载顺序：
+
+
+.yml 与 .application的形式区别
+往请求头上加数据
+
+response 返回json格式数据 text/html格式数据，html页面，也可以返回流的形式，下载链接
+https://www.cnblogs.com/blog411032/p/10876967.html
+("Content-Disposition", "attachment;fileName=" + info);
+
+
+spring cloud ribbon  spring cloud ribbon listOfServers
+https://blog.csdn.net/ylimh_hmily/article/details/78025206
+
+https://blog.csdn.net/qq_37170583/article/details/80704904
+
+spring怎么管理对象
+
+1、简单整合Hystrix（在这部分会用到Ribbon测试的相关项目）@HystrixCommand注解
+2、基于Feign使用Hystrix Feign注解的fallback属性
+要设置：
+#默认feign的hystrix为关闭状态
+feign.hystrix.enabled=true
+2.1、@FeignClient(name="spring-boot-user", fallback=HystrixClientFallback.class)
+
+2.2、使用feignClient注解的fallbackFactory方法
+@Component
+public class HystrixClientFallbackFactory implements FallbackFactory<UserFeignClient> {
+ 
+    @Override
+    public UserFeignClient create(Throwable arg0) {
+        // TODO Auto-generated method stub
+        return new HystrixClientWithFallbackFactory() {
+ 
+            @Override
+            public User findById(Long id) {
+                // TODO Auto-generated method stub
+                User user = new User();
+                user.setId(-1L);
+                return user;
+            }
+             
+        };
+    }
+ 
+}

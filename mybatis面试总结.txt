@@ -1,0 +1,40 @@
+mybatis与hibernate区别:
+
+mybatis映射文件 用一个标签<collection
+
+public class Employee {
+    private Integer eId;
+    private String eName;
+    private Integer gender;
+    private String email;
+    private Department dept;
+	//getter setter
+}
+public class Department {
+    private Integer id;
+    private String departName;
+    private List<Employee> empList;
+	//getter setter 
+}
+<resultMap type="com.hand.mybatis.bean.Department" id="departmentMap">
+	<result property="id" column="did"/>
+	<result property="departName" column="deptname"/>
+	<!--collection定义关联集合类型的属性的封装规则
+		ofType:指定集合里面元素的类型  -->
+	<collection property="empList" ofType="com.hand.mybatis.bean.Employee">
+	 <!-- 定义这个集合元素的封装规则 -->
+	  <id column="eid" property="eId"/>
+	  <result column="ename" property="eName"/>
+	  <result column="email" property="email"/>
+	  <result column="gender" property="gender"/>
+	</collection>
+</resultMap>
+
+mybatis映射文件的继承
+<resultMap id="ExtBaseResultMap" type="com.xxx.dao.Tag" extend="com.xxx.dao.mapper.TagMapper.BaseResultMap">
+ ...
+</resultMap>
+
+sql优化方案：
+存储过程与函数的区别
+Nginx与zuul的区别
