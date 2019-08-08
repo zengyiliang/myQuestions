@@ -1,4 +1,6 @@
 mybatis与hibernate区别:
+mybatis半自动jdbc 灵活的自定义sql
+
 
 mybatis映射文件 用一个标签<collection
 
@@ -34,6 +36,24 @@ mybatis映射文件的继承
 <resultMap id="ExtBaseResultMap" type="com.xxx.dao.Tag" extend="com.xxx.dao.mapper.TagMapper.BaseResultMap">
  ...
 </resultMap>
+
+not in 与 not exist的区别
+如果查询语句使用了not in那么内外表都进行全表扫描，没有用到索引； 
+而not extsts 的子查询依然能用到表上的索引。 
+所以无论那个表大，用not exists都比not in要快，尽量用not exists就好了
+in 与 exist的区别：
+in 和 exists的区别: 如果子查询得出的结果集记录较少，主查询中的表较大且又有索引时应该用in, 
+反之如果外层的主查询记录较少，子查询中的表大，又有索引时使用exists。
+in 是把外表和内表作hash 连接，而exists是对外表作loop循环，每次loop循环再对内表进行查询
+不适合建索引的字段：
+频繁添加 修改 删除的字段
+很多重复的字段 比如性别
+a: 肯定在where条经常使用 b: 该字段的内容不是唯一的几个值 c: 字段内容不是频繁变化。
+
+#{} 与 ${}:
+相同点：都可以从map中直接取值
+不同点：${}取到的值直接拼接到sql语句中，sql语句是直接显示出来的，#{}是以预编译的形式作为一个sql占位符出现，可以防止sql注入
+${} 用于列名  表名 还有排序的字段用 原生jdbc不支持占位符的地方
 
 sql优化方案：
 存储过程与函数的区别
